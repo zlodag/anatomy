@@ -1,0 +1,7 @@
+<app-breadcrumbs></app-breadcrumbs>
+<ol>
+  <li *ngFor="let item of items | async">
+    <a [routerLink]="item._id">{{ item.name }}<span *ngIf="item.category"> (Category {{ item.category }})</span></a>
+  </li>
+  <app-save-name (saveData)="newItem($event)"></app-save-name>
+</ol>

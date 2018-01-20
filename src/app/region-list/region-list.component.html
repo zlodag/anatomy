@@ -1,0 +1,9 @@
+<ol class="breadcrumb">
+  <li class="active">Regions</li>
+</ol>
+<ol>
+  <li *ngFor="let region of regions">
+    <a [routerLink]="region._id">{{ region.name }}</a>
+  </li>
+  <app-save-name (saveData)="new($event)"></app-save-name>
+</ol>
