@@ -1,7 +1,0 @@
-<ol class="breadcrumb">
-  <li><a routerLink="/regions">Regions</a></li>
-  <li *ngIf="regionObservable | async as region"><a [routerLink]="['/regions', (route.params | async)?.regionId ]">{{ region.name }}</a></li>
-  <li *ngIf="categoryObservable | async as category"><a [routerLink]="['/regions', (route.params | async)?.regionId, (route.params | async)?.categoryId ]">{{ category.name }}</a></li>
-  <li *ngIf="sectionObservable | async as section"><a [routerLink]="['/regions', (route.params | async)?.regionId, (route.params | async)?.categoryId, (route.params | async)?.sectionId ]">{{ section.name }}</a></li>
-  <li *ngIf="itemObservable | async as item"><a [routerLink]="['/regions', (route.params | async)?.regionId, (route.params | async)?.categoryId, (route.params | async)?.sectionId, (route.params | async)?.itemId ]">{{ item.name }}</a></li>
-</ol>

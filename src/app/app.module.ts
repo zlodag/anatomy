@@ -14,7 +14,7 @@ import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
 const appRoutes: Routes = [
   {
-    path: 'regions',
+    path: 'anatomy',
     children: [
       { 
         path: '',
@@ -67,8 +67,8 @@ const appRoutes: Routes = [
   },
   {  
     path: '',  
-    redirectTo: '/regions',
-    pathMatch: 'full'
+    redirectTo: '/anatomy',
+    pathMatch: 'prefix'
   }
 ];
 @NgModule({

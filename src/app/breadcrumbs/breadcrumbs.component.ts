@@ -16,6 +16,8 @@ export class BreadcrumbsComponent implements OnInit {
   // sectionObservable : Observable<any>;
   // itemObservable : Observable<any>;
 
+  topName = 'Anatomy';
+  topPath = '/anatomy';
   constructor(public route: ActivatedRoute) { }
 
   ngOnInit() {

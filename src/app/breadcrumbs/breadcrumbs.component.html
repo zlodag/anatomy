@@ -1,9 +1,24 @@
 <ol class="breadcrumb">
-  <li><a routerLink="/regions">Regions</a></li>
-  <li *ngIf="route.snapshot.data.region"><a [routerLink]="['/regions', route.snapshot.data.region._id ]">{{ route.snapshot.data.region.name }}</a></li>
-  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category"><a [routerLink]="['/regions', route.snapshot.data.region._id, route.snapshot.data.category._id ]">{{ route.snapshot.data.category.name }}</a></li>
-  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section"><a [routerLink]="['/regions', route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id ]">{{ route.snapshot.data.section.name }}</a></li>
-  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section && route.snapshot.data.item"><a [routerLink]="['/regions', route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id, route.snapshot.data.item._id ]">{{ route.snapshot.data.item.name }}</a></li>
+  <li [ngClass]="{'active': !route.snapshot.data.region}">
+  	<a *ngIf="route.snapshot.data.region; else noRegion" [routerLink]="[topPath]">{{ topName }}</a>
+  	<ng-template #noRegion>{{ topName }}</ng-template>
+  </li>
+  <li *ngIf="route.snapshot.data.region" [ngClass]="{'active': !route.snapshot.data.category}">
+  	<a *ngIf="route.snapshot.data.category; else noCategory" [routerLink]="[topPath, route.snapshot.data.region._id ]">{{ route.snapshot.data.region.name }}</a>
+  	<ng-template #noCategory>{{ route.snapshot.data.region.name }}</ng-template>
+  </li>
+  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category" [ngClass]="{'active': !route.snapshot.data.section}">
+  	<a *ngIf="route.snapshot.data.section; else noSection" [routerLink]="[topPath, route.snapshot.data.region._id, route.snapshot.data.category._id ]">{{ route.snapshot.data.category.name }}</a>
+  	<ng-template #noSection>{{ route.snapshot.data.category.name }}</ng-template>
+  </li>
+  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section" [ngClass]="{'active': !route.snapshot.data.item}">
+  	<a *ngIf="route.snapshot.data.item; else noItem" [routerLink]="[topPath, route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id ]">{{ route.snapshot.data.section.name }}</a>
+  	<ng-template #noItem>{{ route.snapshot.data.section.name }}</ng-template>
+  </li>
+  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section && route.snapshot.data.item" class="active">
+  	{{ route.snapshot.data.item.name }}
+  	<!-- <a [routerLink]="[topPath, route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id, route.snapshot.data.item._id ]">{{ route.snapshot.data.item.name }}</a> -->
+  </li>
 </ol>
 <!-- 
 <pre>{{ (route.route.snapshot.data | async).region | json }}</pre>
