@@ -5,49 +5,70 @@ import { HttpClientModule, HttpParams } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { RegionResolver, CategoryResolver, SectionResolver, ItemResolver } from './path-resolver.service';
 import { RegionListComponent } from './region-list/region-list.component';
 import { GenericListComponent } from './generic-list/generic-list.component';
 import { SaveNameComponent } from './save-name/save-name.component';
 import { RegionDetailComponent } from './region-detail/region-detail.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
-// import { RegionEditComponent } from './region-edit/region-edit.component';
 
 const appRoutes: Routes = [
-// {
-//   path: 'regions',
-//   component: GenericListComponent
-// },
-{
-  path: 'regions',
-  component: GenericListComponent
-},
-{
-  path: 'regions/:regionId',
-  component: GenericListComponent
-},
-{
-  path: 'regions/:regionId/:categoryId',
-  component: GenericListComponent
-},
-{
-  path: 'regions/:regionId/:categoryId/:sectionId',
-  component: GenericListComponent
-},
-{
-  path: 'regions/:regionId/:categoryId/:sectionId/:itemId',
-  component: GenericListComponent
-},
-
-  // {
-  //   path: 'regions/edit/:id',
-  //   component: RegionEditComponent,
-  //   data: { title: 'Edit Region' }
-  // },
-  
+  {
+    path: 'regions',
+    children: [
+      { 
+        path: '',
+        component: GenericListComponent
+      },
+      {
+        path: ':regionId',
+        resolve: {
+          region: RegionResolver
+        },
+        children: [
+          { 
+            path: '',
+            component: GenericListComponent,
+          },
+          {
+            path: ':categoryId',
+            resolve: {
+              category: CategoryResolver
+            },
+            children: [
+              { 
+                path: '',
+                component: GenericListComponent
+              },
+              {
+                path: ':sectionId',
+                resolve: {
+                  section: SectionResolver
+                },
+                children: [
+                  { 
+                    path: '',
+                    component: GenericListComponent
+                  },
+                  {
+                    path: ':itemId',
+                    resolve: {
+                      item: ItemResolver
+                    },
+                    component: GenericListComponent
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   {  
-   path: '',
-  redirectTo: '/regions',
-  pathMatch: 'full'
+    path: '',  
+    redirectTo: '/regions',
+    pathMatch: 'full'
   }
 ];
 @NgModule({
@@ -70,7 +91,7 @@ const appRoutes: Routes = [
       { enableTracing: false } // <-- debugging purposes only
       )
     ],
-    providers: [],
+    providers: [RegionResolver, CategoryResolver, SectionResolver, ItemResolver],
     bootstrap: [AppComponent]
   })
 export class AppModule { }

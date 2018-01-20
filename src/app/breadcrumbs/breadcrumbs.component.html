@@ -1,7 +1,13 @@
 <ol class="breadcrumb">
   <li><a routerLink="/regions">Regions</a></li>
-  <li *ngIf="regionObservable | async as region"><a [routerLink]="['/regions', (route.params | async)?.regionId ]">{{ region.name }}</a></li>
-  <li *ngIf="categoryObservable | async as category"><a [routerLink]="['/regions', (route.params | async)?.regionId, (route.params | async)?.categoryId ]">{{ category.name }}</a></li>
-  <li *ngIf="sectionObservable | async as section"><a [routerLink]="['/regions', (route.params | async)?.regionId, (route.params | async)?.categoryId, (route.params | async)?.sectionId ]">{{ section.name }}</a></li>
-  <li *ngIf="itemObservable | async as item"><a [routerLink]="['/regions', (route.params | async)?.regionId, (route.params | async)?.categoryId, (route.params | async)?.sectionId, (route.params | async)?.itemId ]">{{ item.name }}</a></li>
+  <li *ngIf="route.snapshot.data.region"><a [routerLink]="['/regions', route.snapshot.data.region._id ]">{{ route.snapshot.data.region.name }}</a></li>
+  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category"><a [routerLink]="['/regions', route.snapshot.data.region._id, route.snapshot.data.category._id ]">{{ route.snapshot.data.category.name }}</a></li>
+  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section"><a [routerLink]="['/regions', route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id ]">{{ route.snapshot.data.section.name }}</a></li>
+  <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section && route.snapshot.data.item"><a [routerLink]="['/regions', route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id, route.snapshot.data.item._id ]">{{ route.snapshot.data.item.name }}</a></li>
 </ol>
+<!-- 
+<pre>{{ (route.route.snapshot.data | async).region | json }}</pre>
+<pre>{{ (route.route.snapshot.data | async).category | json }}</pre>
+<pre>{{ (route.route.snapshot.data | async).section | json }}</pre>
+<pre>{{ (route.route.snapshot.data | async).item | json }}</pre>
+ -->
