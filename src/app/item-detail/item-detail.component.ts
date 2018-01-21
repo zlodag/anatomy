@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   templateUrl: './item-detail.component.html',
-  styleUrls: ['./item-detail.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class ItemDetailComponent implements OnInit {
@@ -61,22 +60,7 @@ export class ItemDetailComponent implements OnInit {
 	  		}
   		}
   	}
-  	// this.introduction = this.route.snapshot.data.item.introduction || "";
   }
-
-  // getUpdateObject(key: string, trimmedValue: string){
-  // 	let updateObject = {};
-  // 	updateObject[key] = trimmedValue;
-  // 	return  trimmedValue.length ? updateObject : {'$unset': updateObject };
-  // }
-
-  // updateIntroduction(){
-  // 	this.introduction = this.introduction.trim();
-  //   this.http.put('/api/items/' + this.route.snapshot.paramMap.get('itemId'), this.getUpdateObject('introduction', this.introduction))
-  //       .subscribe(() => {
-  //       	this.route.snapshot.data.item.introduction = this.introduction;
-  //       });
-  // }
 
   update(){
   	this.data[this.selectedOption.key] = this.data[this.selectedOption.key].trim();

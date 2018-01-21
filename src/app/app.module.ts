@@ -89,10 +89,7 @@ const appRoutes: Routes = [
   BrowserModule,
   FormsModule,
   HttpClientModule,
-  RouterModule.forRoot(
-    appRoutes,
-      { enableTracing: false } // <-- debugging purposes only
-      )
+  RouterModule.forRoot(appRoutes, { enableTracing: false })
   ],
   providers: [
   RegionResolver,

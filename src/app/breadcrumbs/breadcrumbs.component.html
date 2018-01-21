@@ -17,12 +17,5 @@
   </li>
   <li *ngIf="route.snapshot.data.region && route.snapshot.data.category && route.snapshot.data.section && route.snapshot.data.item" class="active">
   	{{ route.snapshot.data.item.name }}
-  	<!-- <a [routerLink]="[topPath, route.snapshot.data.region._id, route.snapshot.data.category._id, route.snapshot.data.section._id, route.snapshot.data.item._id ]">{{ route.snapshot.data.item.name }}</a> -->
   </li>
 </ol>
-<!-- 
-<pre>{{ (route.route.snapshot.data | async).region | json }}</pre>
-<pre>{{ (route.route.snapshot.data | async).category | json }}</pre>
-<pre>{{ (route.route.snapshot.data | async).section | json }}</pre>
-<pre>{{ (route.route.snapshot.data | async).item | json }}</pre>
- -->

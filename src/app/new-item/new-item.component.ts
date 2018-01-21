@@ -5,7 +5,6 @@ import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-new-item',
   templateUrl: './new-item.component.html',
-  styleUrls: ['./new-item.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class NewItemComponent implements OnInit {
@@ -17,15 +16,6 @@ export class NewItemComponent implements OnInit {
   constructor(private http: HttpClient, public route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
-    // this.route.paramMap.subscribe(params => {
-    //   if (params.has('sectionId')) {
-    //     if (!this.data['category']) {
-    //       this.data['category'] = 1;
-    //     }
-    //   } else {
-    //     delete this.data['category'];
-    //   }
-    // });
   }
 
   newRegion() {
