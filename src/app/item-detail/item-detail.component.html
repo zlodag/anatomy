@@ -1,0 +1,32 @@
+<app-breadcrumbs></app-breadcrumbs>
+<dl class="dl-horizontal">
+	<!-- <dt>ID</dt>
+	<dd>{{ route.snapshot.data.item._id }}</dd> -->
+	<dt>Title</dt>
+	<dd>{{ route.snapshot.data.item.name }}</dd>
+	<dt>Category</dt>
+	<dd>{{ route.snapshot.data.item.category }}</dd>
+	<dt *ngIf="route.snapshot.data.item.introduction">Introduction</dt>
+	<dd *ngIf="route.snapshot.data.item.introduction">{{ route.snapshot.data.item.introduction }}</dd>
+	<dt *ngIf="route.snapshot.data.item.superiorRelations">Superior relations</dt>
+	<dd *ngIf="route.snapshot.data.item.superiorRelations">{{ route.snapshot.data.item.superiorRelations }}</dd>
+	<dt *ngIf="route.snapshot.data.item.inferiorRelations">Inferior relations</dt>
+	<dd *ngIf="route.snapshot.data.item.inferiorRelations">{{ route.snapshot.data.item.inferiorRelations }}</dd>
+</dl>
+<form (ngSubmit)="update()">
+	<select class="form-control" [(ngModel)]="selectedKey" [ngModelOptions]="{standalone: true}">
+		<option value="">Update field...</option>
+	    <option *ngFor="let option of updateOptions" [ngValue]="option.key">
+	        {{option.label}}
+	    </option>
+	</select>
+	<div *ngIf="selectedKey">
+		<div class="form-group">
+			<!-- <label for="introduction">Introduction</label> -->
+			<input type="text" class="form-control" [(ngModel)]="data[selectedKey]" [ngModelOptions]="{standalone: true}" />
+		</div>
+		<div class="form-group">
+			<button type="submit" class="btn btn-success btn-sm">Save</button>
+		</div>
+	</div>
+</form>

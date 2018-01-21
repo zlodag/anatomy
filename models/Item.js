@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var ItemSchema = new mongoose.Schema({
   name: {
   	type: String,
+    trim: true,
   	required: true
   },
   category: {
@@ -20,7 +21,30 @@ var ItemSchema = new mongoose.Schema({
     ref: 'Section',
     index: true,
     required: true
-  }
+  },
+  introduction: String,
+  structure: String,
+  superiorRelations: [String],
+  inferiorRelations: [String],
+  anteriorRelations: [String],
+  posteriorRelations: [String],
+  medialRelations: [String],
+  lateralRelations: [String],
+  superiorBoundary: String,
+  inferiorBoundary: String,
+  anteriorBoundary: String,
+  posteriorBoundary: String,
+  medialBoundary: String,
+  lateralBoundary: String,
+  contents: [String],
+  articulations: [String],
+  attachments: [String],
+  specialStructures: [String],
+  nerveSupply: String,
+  arterialSupply: String,
+  venousDrainage: String,
+  lymphaticDrainage: String,
+  variants: [String]
 });
 
 module.exports = mongoose.model('Item', ItemSchema);

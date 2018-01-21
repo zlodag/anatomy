@@ -4,94 +4,106 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpParams } from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 
-import { AppComponent } from './app.component';
 import { RegionResolver, CategoryResolver, SectionResolver, ItemResolver } from './path-resolver.service';
-import { RegionListComponent } from './region-list/region-list.component';
+import { RegionListResolver, CategoryListResolver, SectionListResolver, ItemListResolver } from './list-resolver.service';
+import { AppComponent } from './app.component';
 import { GenericListComponent } from './generic-list/generic-list.component';
-import { SaveNameComponent } from './save-name/save-name.component';
-import { RegionDetailComponent } from './region-detail/region-detail.component';
+import { NewItemComponent } from './new-item/new-item.component';
+import { ItemDetailComponent } from './item-detail/item-detail.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
 const appRoutes: Routes = [
+{
+  path: 'anatomy',
+  resolve: {
+    regionList: RegionListResolver
+  },
+  children: [
+  { 
+    path: '',
+    component: GenericListComponent
+  },
   {
-    path: 'anatomy',
+    path: ':regionId',
+    resolve: {
+      region: RegionResolver,
+      categoryList: CategoryListResolver
+    },
     children: [
+    { 
+      path: '',
+      component: GenericListComponent,
+    },
+    {
+      path: ':categoryId',
+      resolve: {
+        category: CategoryResolver,
+        sectionList: SectionListResolver
+      },
+      children: [
       { 
         path: '',
         component: GenericListComponent
       },
       {
-        path: ':regionId',
+        path: ':sectionId',
         resolve: {
-          region: RegionResolver
+          section: SectionResolver,
+          itemList: ItemListResolver
         },
         children: [
-          { 
-            path: '',
-            component: GenericListComponent,
+        { 
+          path: '',
+          component: GenericListComponent
+        },
+        {
+          path: ':itemId',
+          resolve: {
+            item: ItemResolver
           },
-          {
-            path: ':categoryId',
-            resolve: {
-              category: CategoryResolver
-            },
-            children: [
-              { 
-                path: '',
-                component: GenericListComponent
-              },
-              {
-                path: ':sectionId',
-                resolve: {
-                  section: SectionResolver
-                },
-                children: [
-                  { 
-                    path: '',
-                    component: GenericListComponent
-                  },
-                  {
-                    path: ':itemId',
-                    resolve: {
-                      item: ItemResolver
-                    },
-                    component: GenericListComponent
-                  }
-                ]
-              }
-            ]
-          }
+          component: ItemDetailComponent
+        }
         ]
       }
+      ]
+    }
     ]
-  },
-  {  
-    path: '',  
-    redirectTo: '/anatomy',
-    pathMatch: 'prefix'
   }
+  ]
+},
+{  
+  path: '',  
+  redirectTo: '/anatomy',
+  pathMatch: 'full'
+}
 ];
 @NgModule({
   declarations: [
   AppComponent,
-  RegionListComponent,
   GenericListComponent,
-  SaveNameComponent,
-  RegionDetailComponent,
+  NewItemComponent,
   BreadcrumbsComponent,
-    // RegionCreateComponent,
-    // RegionEditComponent
-    ],
-    imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    RouterModule.forRoot(
-      appRoutes,
+  ItemDetailComponent,
+  ],
+  imports: [
+  BrowserModule,
+  FormsModule,
+  HttpClientModule,
+  RouterModule.forRoot(
+    appRoutes,
       { enableTracing: false } // <-- debugging purposes only
       )
-    ],
-    providers: [RegionResolver, CategoryResolver, SectionResolver, ItemResolver],
-    bootstrap: [AppComponent]
-  })
+  ],
+  providers: [
+  RegionResolver,
+  CategoryResolver,
+  SectionResolver,
+  ItemResolver,
+  RegionListResolver,
+  CategoryListResolver,
+  SectionListResolver,
+  ItemListResolver,
+  ],
+  bootstrap: [AppComponent]
+})
 export class AppModule { }

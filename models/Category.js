@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var CategorySchema = new mongoose.Schema({
   name: {
   	type: String,
+    trim: true,
   	required: true
   },
   region: {

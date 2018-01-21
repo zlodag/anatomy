@@ -1,0 +1,7 @@
+<app-breadcrumbs></app-breadcrumbs>
+<ol>
+  <li *ngFor="let region of route.snapshot.data.regionList">
+    <a [routerLink]="region._id">{{ region.name }}</a>
+  </li>
+</ol>
+<app-new-item></app-new-item>

@@ -1,7 +1,7 @@
 <app-breadcrumbs></app-breadcrumbs>
 <ol>
-  <li *ngFor="let item of items | async">
-    <a [routerLink]="item._id">{{ item.name }}<span *ngIf="item.category"> (Category {{ item.category }})</span></a>
+  <li *ngFor="let item of (route.snapshot.data.itemList || route.snapshot.data.sectionList || route.snapshot.data.categoryList || route.snapshot.data.regionList)">
+    <a [routerLink]="item._id">{{ item.name }}<span *ngIf="route.snapshot.data.itemList"> (Category {{ item.category }})</span></a>
   </li>
-  <app-save-name (saveData)="newItem($event)"></app-save-name>
 </ol>
+<app-new-item></app-new-item>

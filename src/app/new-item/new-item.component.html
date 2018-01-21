@@ -1,0 +1,84 @@
+<div *ngIf="add">
+  <div *ngIf="route.snapshot.data.region; else noRegion">
+    <div *ngIf="route.snapshot.data.category; else noCategory">
+      <div *ngIf="route.snapshot.data.section; else noSection">
+        <form (ngSubmit)="newItem()" #newItemForm="ngForm" class="form-inline">
+          <div class="form-group">
+            <label for="newItemName">New item</label>
+            <input id="newItemName" type="text" class="form-control" [(ngModel)]="name" name="name" placeholder="Name" required />
+          </div>
+          <div class="form-group">
+            <label for="newItemCategory">Category</label>
+            <input id="newItemCategory" class="form-control" type="number" min="1" max="3" step="1" [(ngModel)]="category" name="category" placeholder="Category" required />
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success btn-sm" [disabled]="!newItemForm.form.valid">Save</button>
+          </div>
+        </form>
+      </div>
+      <ng-template #noSection>
+        <form (ngSubmit)="newSection()" #newSectionForm="ngForm" class="form-inline">
+          <div class="form-group">
+            <label for="newSectionName">New section</label>
+            <input id="newSectionName" type="text" class="form-control" [(ngModel)]="name" name="name" placeholder="Name" required />
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success btn-sm" [disabled]="!newSectionForm.form.valid">Save</button>
+          </div>
+        </form>
+      </ng-template>
+    </div>
+    <ng-template #noCategory>
+      <form (ngSubmit)="newCategory()" #newCategoryForm="ngForm" class="form-inline">
+        <div class="form-group">
+          <label for="newCategoryName">New category</label>
+          <input id="newCategoryName" type="text" class="form-control" [(ngModel)]="name" name="name" placeholder="Name" required />
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-success btn-sm" [disabled]="!newCategoryForm.form.valid">Save</button>
+        </div>
+      </form>
+    </ng-template>
+  </div>
+  <ng-template #noRegion>
+    <form (ngSubmit)="newRegion()" #newRegionForm="ngForm" class="form-inline">
+      <div class="form-group">
+        <label for="newRegionName">New region</label>
+        <input id="newRegionName" type="text" class="form-control" [(ngModel)]="name" name="name" placeholder="Name" required />
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-success btn-sm" [disabled]="!newRegionForm.form.valid">Save</button>
+      </div>
+    </form>
+  </ng-template>
+</div>
+<button *ngIf="!add" type="button" class="btn btn-primary btn-sm" (click)="add = true;">Add</button>
+
+
+  <!-- 
+  <form *ngIf="add && " (ngSubmit)="onSubmit(form)" #form="ngForm" class="form-inline">
+        <div class="form-group">
+          <input type="text" class="form-control" [(ngModel)]="data.name" name="name" placeholder="Name" required>
+  </div>
+  <div class="form-group" *ngIf="data.category">
+    <label>Category</label>
+    <input type="number" class="form-control" min="1" max="3" step="1" [(ngModel)]="data.category" name="category" required>
+  </div>
+  <div class="form-group">
+    <label for="name">Author</label>
+    <input type="text" class="form-control" [(ngModel)]="region.author" name="author" required>
+  </div>
+  <div class="form-group">
+    <label for="name">Published Year</label>
+    <input type="number" class="form-control" [(ngModel)]="region.published_year" name="published_year" required>
+  </div>
+  <div class="form-group">
+    <label for="name">Publisher</label>
+    <input type="text" class="form-control" [(ngModel)]="region.publisher" name="publisher" required>
+  </div>
+  <div class="form-group">
+    <button type="submit" class="btn btn-success btn-sm" [disabled]="!nameForm.form.valid">Save</button>
+  </div>
+</form>
+<button *ngIf="!add" type="button" class="btn btn-primary btn-sm" (click)="add = true;">Add</button>
+-->
