@@ -1,79 +1,29 @@
 <app-breadcrumbs></app-breadcrumbs>
 <app-edit-button></app-edit-button>
-<dl class="dl-horizontal">
-	<dt>Title</dt>
-	<dd>{{ route.snapshot.data.item.name }}</dd>
-	<dt>Category</dt>
-	<dd>{{ route.snapshot.data.item.category }}</dd>
 
-	<dt *ngIf="route.snapshot.data.item.introduction">Introduction</dt>
-	<dd *ngIf="route.snapshot.data.item.introduction">{{ route.snapshot.data.item.introduction }}</dd>
-	<dt *ngIf="route.snapshot.data.item.structure">Structure</dt>
-	<dd *ngIf="route.snapshot.data.item.structure">{{ route.snapshot.data.item.structure }}</dd>
-
-	<dt *ngIf="route.snapshot.data.item.superiorRelations.length">Superior relations</dt>
-	<dd *ngFor="let relation of route.snapshot.data.item.superiorRelations">{{ relation }}</dd>
-	<dt *ngIf="route.snapshot.data.item.inferiorRelations.length">Inferior relations</dt>
-	<dd *ngFor="let relation of route.snapshot.data.item.inferiorRelations">{{ relation }}</dd>
-	<dt *ngIf="route.snapshot.data.item.anteriorRelations.length">Anterior relations</dt>
-	<dd *ngFor="let relation of route.snapshot.data.item.anteriorRelations">{{ relation }}</dd>
-	<dt *ngIf="route.snapshot.data.item.posteriorRelations.length">Posterior relations</dt>
-	<dd *ngFor="let relation of route.snapshot.data.item.posteriorRelations">{{ relation }}</dd>
-	<dt *ngIf="route.snapshot.data.item.medialRelations.length">Medial relations</dt>
-	<dd *ngFor="let relation of route.snapshot.data.item.medialRelations">{{ relation }}</dd>
-	<dt *ngIf="route.snapshot.data.item.lateralRelations.length">Lateral relations</dt>
-	<dd *ngFor="let relation of route.snapshot.data.item.lateralRelations">{{ relation }}</dd>
-
-	<dt *ngIf="route.snapshot.data.item.superiorBoundary">Superior boundary</dt>
-	<dd *ngIf="route.snapshot.data.item.superiorBoundary">{{ route.snapshot.data.item.superiorBoundary }}</dd>
-	<dt *ngIf="route.snapshot.data.item.inferiorBoundary">Inferior boundary</dt>
-	<dd *ngIf="route.snapshot.data.item.inferiorBoundary">{{ route.snapshot.data.item.inferiorBoundary }}</dd>
-	<dt *ngIf="route.snapshot.data.item.anteriorBoundary">Anterior boundary</dt>
-	<dd *ngIf="route.snapshot.data.item.anteriorBoundary">{{ route.snapshot.data.item.anteriorBoundary }}</dd>
-	<dt *ngIf="route.snapshot.data.item.posteriorBoundary">Posterior boundary</dt>
-	<dd *ngIf="route.snapshot.data.item.posteriorBoundary">{{ route.snapshot.data.item.posteriorBoundary }}</dd>
-	<dt *ngIf="route.snapshot.data.item.medialBoundary">Medial boundary</dt>
-	<dd *ngIf="route.snapshot.data.item.medialBoundary">{{ route.snapshot.data.item.medialBoundary }}</dd>
-	<dt *ngIf="route.snapshot.data.item.lateralBoundary">Lateral boundary</dt>
-	<dd *ngIf="route.snapshot.data.item.lateralBoundary">{{ route.snapshot.data.item.lateralBoundary }}</dd>
-
-	<dt *ngIf="route.snapshot.data.item.contents.length">Contents</dt>
-	<dd *ngFor="let content of route.snapshot.data.item.contents">{{ content }}</dd>
-	<dt *ngIf="route.snapshot.data.item.articulations.length">Articulations</dt>
-	<dd *ngFor="let articulation of route.snapshot.data.item.articulations">{{ articulation }}</dd>
-	<dt *ngIf="route.snapshot.data.item.attachments.length">Attachments</dt>
-	<dd *ngFor="let attachment of route.snapshot.data.item.attachments">{{ attachment }}</dd>
-	<dt *ngIf="route.snapshot.data.item.specialStructures.length">Special structures</dt>
-	<dd *ngFor="let specialStructure of route.snapshot.data.item.specialStructures">{{ specialStructure }}</dd>
-
-	<dt *ngIf="route.snapshot.data.item.nerveSupply">Nerve supply</dt>
-	<dd *ngIf="route.snapshot.data.item.nerveSupply">{{ route.snapshot.data.item.nerveSupply }}</dd>
-	<dt *ngIf="route.snapshot.data.item.arterialSupply">Arterial supply</dt>
-	<dd *ngIf="route.snapshot.data.item.arterialSupply">{{ route.snapshot.data.item.arterialSupply }}</dd>
-	<dt *ngIf="route.snapshot.data.item.venousDrainage">Venous drainage</dt>
-	<dd *ngIf="route.snapshot.data.item.venousDrainage">{{ route.snapshot.data.item.venousDrainage }}</dd>
-	<dt *ngIf="route.snapshot.data.item.lymphaticDrainage">Lymphatic drainage</dt>
-	<dd *ngIf="route.snapshot.data.item.lymphaticDrainage">{{ route.snapshot.data.item.lymphaticDrainage }}</dd>
-
-	<dt *ngIf="route.snapshot.data.item.variants.length">Variants</dt>
-	<dd *ngFor="let variant of route.snapshot.data.item.variants">{{ variant }}</dd>
-
-</dl>
-<form *ngIf="appState.edit" (ngSubmit)="update()">
-	<div class="form-group">
-		<select class="form-control" [(ngModel)]="selectedOption" [ngModelOptions]="{standalone: true}">
-			<option [ngValue]="null" disabled>Edit</option>
-		    <option *ngFor="let option of updateOptions" [ngValue]="option">
-		        {{option.label}}
-		    </option>
-		</select>
+<div *ngFor="let field of detailFields">
+	<div *ngIf="appState.edit || (field.array ? route.snapshot.data.item[field.key].length : route.snapshot.data.item[field.key])">
+		<h4>
+			{{ field.label }}
+	    	<span *ngIf="appState.edit && field.array" class="glyphicon glyphicon-plus text-success" (click)="updateField(field, false)"></span>
+	    	<span *ngIf="appState.edit && !field.array && !route.snapshot.data.item[field.key]" class="glyphicon glyphicon-pencil text-success" (click)="updateField(field, false)"></span>
+	    </h4>
+		<ul *ngIf="field.array; else single" class="list-unstyled">
+			<li *ngFor="let item of route.snapshot.data.item[field.key]; index as i">
+				{{ item }}
+		    	<span *ngIf="appState.edit">
+		    		<span class="glyphicon glyphicon-remove text-danger" (click)="updateField(field, true, i)"></span>
+		    	</span>
+			</li>
+		</ul>
+	    <ng-template #single>
+	    	<div *ngIf="route.snapshot.data.item[field.key]">
+		    	{{ route.snapshot.data.item[field.key] }}
+		    	<span *ngIf="appState.edit">
+			    	<span class="glyphicon glyphicon-pencil text-success" (click)="updateField(field, false)"></span>
+		    		<span class="glyphicon glyphicon-remove text-danger" (click)="updateField(field, true)"></span>
+		    	</span>
+		    </div>
+	    </ng-template>
 	</div>
-	<div *ngIf="selectedOption">
-		<div class="form-group">
-			<input type="text" class="form-control" [(ngModel)]="data[selectedOption.key]" [ngModelOptions]="{standalone: true}" />
-		</div>
-		<div class="form-group">
-			<button type="submit" class="btn btn-success btn-sm">Save</button>
-		</div>
-	</div>
-</form>
+</div>

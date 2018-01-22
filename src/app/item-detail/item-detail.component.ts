@@ -2,93 +2,72 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AppStateService } from '../app-state.service';
+import { DetailField, DETAIL_FIELDS } from './detail-field';
 
 @Component({
   templateUrl: './item-detail.component.html',
+  styles: ['.glyphicon:hover {cursor: pointer;}'],
   encapsulation: ViewEncapsulation.None
 })
 export class ItemDetailComponent implements OnInit {
 
   constructor(public route: ActivatedRoute, private http: HttpClient, public appState: AppStateService) { }
 
-  private apiUrl : string;
+  private detailFields = DETAIL_FIELDS;
 
-  data = {};
+  ngOnInit() {}
 
-  updateOptions : {key: string; label: string; array: boolean}[] = [
-
-  	{key: 'introduction', label: 'Introduction', array: false },
-  	{key: 'structure', label: 'Structure', array: false },
-
-  	{key: 'superiorRelations', label: 'Add superior relation', array: true },
-  	{key: 'inferiorRelations', label: 'Add inferior relation', array: true },
-  	{key: 'anteriorRelations', label: 'Add anterior relation', array: true },
-  	{key: 'posteriorRelations', label: 'Add posterior relation', array: true },
-  	{key: 'medialRelations', label: 'Add medial relation', array: true },
-  	{key: 'lateralRelations', label: 'Add lateral relation', array: true },
-
-  	{key: 'superiorBoundary', label: 'Superior boundary', array: false },
-  	{key: 'inferiorBoundary', label: 'Inferior boundary', array: false },
-  	{key: 'anteriorBoundary', label: 'Anterior boundary', array: false },
-  	{key: 'posteriorBoundary', label: 'Posterior boundary', array: false },
-  	{key: 'medialBoundary', label: 'Medial boundary', array: false },
-  	{key: 'lateralBoundary', label: 'Lateral boundary', array: false },
-
-  	{key: 'contents', label: 'Add content', array: true },
-  	{key: 'articulations', label: 'Add articulation', array: true },
-  	{key: 'attachments', label: 'Add attachment', array: true },
-  	{key: 'specialStructures', label: 'Add special structure', array: true },
-
-  	{key: 'nerveSupply', label: 'Nerve supply', array: false },
-  	{key: 'arterialSupply', label: 'Arterial supply', array: false },
-  	{key: 'venousDrainage', label: 'Venous drainage', array: false },
-  	{key: 'lymphaticDrainage', label: 'Lymphatic drainage', array: false },
-
-  	{key: 'variants', label: 'Add variant', array: true },
-
-  ];
-
-  selectedOption : {key: string; label: string; array: boolean} = null;
-
-  ngOnInit() {
-  	this.apiUrl = '/api/items/' + this.route.snapshot.paramMap.get('itemId');
-  	for (var i = 0; i < this.updateOptions.length - 1; i++) {
-  		let option = this.updateOptions[i];
-  		if (!option.array) {
-	  		let value = this.route.snapshot.data.item[option.key];
-	  		if (value) {
-				this.data[option.key] = value;
-	  		}
-  		}
-  	}
-  }
-
-  update(){
-  	this.data[this.selectedOption.key] = this.data[this.selectedOption.key].trim();
-  	let updateObject = {};
-  	updateObject[this.selectedOption.key] = this.data[this.selectedOption.key];
-  	let add = !!this.data[this.selectedOption.key].length;
-  	let array = this.selectedOption.array;
-  	if (array && !add) {
-  		console.error('Trying to delete from array?');
-  		return;
-  	}
-  	let body = {};
-  	body[array ? '$addToSet' : add ? '$set' : '$unset'] = updateObject;
-  	this.http.put(this.apiUrl, body).subscribe((data) => {
-  		if (array) {
-			if (this.route.snapshot.data.item[this.selectedOption.key].indexOf(this.data[this.selectedOption.key]) == -1){
-				this.route.snapshot.data.item[this.selectedOption.key].push(this.data[this.selectedOption.key]);
-			}
-			this.data[this.selectedOption.key] = "";
-		} else if (add) {
-			this.route.snapshot.data.item[this.selectedOption.key] = this.data[this.selectedOption.key];
-		} else {
-  			delete this.route.snapshot.data.item[this.selectedOption.key];
-  		}
+  updateField(field: DetailField, remove: boolean, arrayIndex?: number){
+    let operator: string;
+    let sendValue: string;
+    if (field.array){
+      if (remove) {
+        operator = '$pull';
+        sendValue = this.route.snapshot.data.item[field.key][arrayIndex];
+      } else {
+        operator = '$addToSet';
+        sendValue = prompt('Add new item to "' + field.label + '"');
+        if (sendValue) {
+          sendValue = sendValue.trim();
+        }
+        if (!sendValue) {
+          return;
+        };
+      }
+    } else {
+      if (remove) {
+        operator = '$unset';
+        sendValue = null;
+      } else {
+        operator = '$set';
+        sendValue = prompt('Update value for "' + field.label + '"', this.route.snapshot.data.item[field.key] || "");
+        if (sendValue) {
+          sendValue = sendValue.trim();
+        }
+        if (!sendValue) {
+          return;
+        };
+      }
+    }
+    let updateObject = {};
+    updateObject[operator] = {};
+    updateObject[operator][field.key] = sendValue;
+    this.http.put('/api/items/' + this.route.snapshot.paramMap.get('itemId'), updateObject).subscribe((data) => {
+      if (field.array){
+        if (remove) {
+          this.route.snapshot.data.item[field.key].splice(arrayIndex, 1);
+        } else {
+          this.route.snapshot.data.item[field.key].push(sendValue);
+        }
+      } else {
+        if (remove) {
+          delete this.route.snapshot.data.item[field.key];
+        } else {
+          this.route.snapshot.data.item[field.key] = sendValue;
+        }
+      }
     }, (error) => {
-    	console.error(error);
+      console.error(error);
     });
   }
-
 }
