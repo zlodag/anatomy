@@ -1,4 +1,5 @@
 <app-breadcrumbs></app-breadcrumbs>
+<app-edit-button></app-edit-button>
 <ol>
   <li *ngFor="let item of (route.snapshot.data.itemList || route.snapshot.data.sectionList || route.snapshot.data.categoryList || route.snapshot.data.regionList)">
     <a [routerLink]="item._id">{{ item.name }}<span *ngIf="route.snapshot.data.itemList"> (Category {{ item.category }})</span></a>

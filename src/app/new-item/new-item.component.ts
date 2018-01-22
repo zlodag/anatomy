@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { AppStateService } from '../app-state.service';
 
 @Component({
   selector: 'app-new-item',
@@ -9,11 +10,10 @@ import { HttpClient } from '@angular/common/http';
 })
 export class NewItemComponent implements OnInit {
 
-  add = false;
   name = "";
   category = 1;
 
-  constructor(private http: HttpClient, public route: ActivatedRoute, private router: Router) { }
+  constructor(private http: HttpClient, public route: ActivatedRoute, private router: Router, public appState: AppStateService) { }
 
   ngOnInit() {
   }

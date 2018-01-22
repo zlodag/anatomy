@@ -6,11 +6,13 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { RegionResolver, CategoryResolver, SectionResolver, ItemResolver } from './path-resolver.service';
 import { RegionListResolver, CategoryListResolver, SectionListResolver, ItemListResolver } from './list-resolver.service';
+import { AppStateService } from './app-state.service';
 import { AppComponent } from './app.component';
 import { GenericListComponent } from './generic-list/generic-list.component';
 import { NewItemComponent } from './new-item/new-item.component';
 import { ItemDetailComponent } from './item-detail/item-detail.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
+import { EditButtonComponent } from './edit-button/edit-button.component';
 
 const appRoutes: Routes = [
 {
@@ -79,27 +81,29 @@ const appRoutes: Routes = [
 ];
 @NgModule({
   declarations: [
-  AppComponent,
-  GenericListComponent,
-  NewItemComponent,
-  BreadcrumbsComponent,
-  ItemDetailComponent,
+    AppComponent,
+    GenericListComponent,
+    NewItemComponent,
+    BreadcrumbsComponent,
+    ItemDetailComponent,
+    EditButtonComponent,
   ],
   imports: [
-  BrowserModule,
-  FormsModule,
-  HttpClientModule,
-  RouterModule.forRoot(appRoutes, { enableTracing: false })
+    BrowserModule,
+    FormsModule,
+    HttpClientModule,
+    RouterModule.forRoot(appRoutes, { enableTracing: false })
   ],
   providers: [
-  RegionResolver,
-  CategoryResolver,
-  SectionResolver,
-  ItemResolver,
-  RegionListResolver,
-  CategoryListResolver,
-  SectionListResolver,
-  ItemListResolver,
+    AppStateService,
+    RegionResolver,
+    CategoryResolver,
+    SectionResolver,
+    ItemResolver,
+    RegionListResolver,
+    CategoryListResolver,
+    SectionListResolver,
+    ItemListResolver,
   ],
   bootstrap: [AppComponent]
 })

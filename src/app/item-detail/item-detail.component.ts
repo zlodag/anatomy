@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { AppStateService } from '../app-state.service';
 
 @Component({
   templateUrl: './item-detail.component.html',
@@ -8,7 +9,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ItemDetailComponent implements OnInit {
 
-  constructor(public route: ActivatedRoute, private http: HttpClient) { }
+  constructor(public route: ActivatedRoute, private http: HttpClient, public appState: AppStateService) { }
 
   private apiUrl : string;
 

@@ -1,4 +1,4 @@
-<div *ngIf="add">
+ <div *ngIf="appState.edit">
   <div *ngIf="route.snapshot.data.region; else noRegion">
     <div *ngIf="route.snapshot.data.category; else noCategory">
       <div *ngIf="route.snapshot.data.section; else noSection">
@@ -52,4 +52,3 @@
     </form>
   </ng-template>
 </div>
-<button *ngIf="!add" type="button" class="btn btn-primary btn-sm" (click)="add = true;">Add</button>
