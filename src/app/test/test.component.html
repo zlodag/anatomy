@@ -1,0 +1,9 @@
+<div class="pre-scrollable" #scrollMe>
+	<div *ngFor="let line of lines">
+		<kbd *ngIf="line.userInput; else serverInput">{{ line.text }}</kbd>
+		<ng-template #serverInput><samp>{{ line.text }}</samp></ng-template>
+	</div>
+</div>
+<form name="addLineForm" (ngSubmit)="addLine()">
+	<input id="currentLineInput" type="text" name="currentLine" [(ngModel)]="currentLine" autofocus />
+</form>

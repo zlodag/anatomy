@@ -6,6 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { RegionResolver, CategoryResolver, SectionResolver, ItemResolver } from './path-resolver.service';
 import { RegionListResolver, CategoryListResolver, SectionListResolver, ItemListResolver } from './list-resolver.service';
+import { AllItemsResolver } from './test-resolver.service';
 import { AppStateService } from './app-state.service';
 import { AppComponent } from './app.component';
 import { GenericListComponent } from './generic-list/generic-list.component';
@@ -13,8 +14,22 @@ import { NewItemComponent } from './new-item/new-item.component';
 import { ItemDetailComponent } from './item-detail/item-detail.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { EditButtonComponent } from './edit-button/edit-button.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { TestComponent } from './test/test.component';
 
 const appRoutes: Routes = [
+{  
+  path: '',  
+  component: DashboardComponent,
+  pathMatch: 'full',
+},
+{
+  path: 'test',  
+  component: TestComponent,
+  resolve: {
+    allItems: AllItemsResolver
+  }
+},
 {
   path: 'anatomy',
   resolve: {
@@ -73,11 +88,6 @@ const appRoutes: Routes = [
   }
   ]
 },
-{  
-  path: '',  
-  redirectTo: '/anatomy',
-  pathMatch: 'full'
-}
 ];
 @NgModule({
   declarations: [
@@ -87,6 +97,8 @@ const appRoutes: Routes = [
     BreadcrumbsComponent,
     ItemDetailComponent,
     EditButtonComponent,
+    DashboardComponent,
+    TestComponent,
   ],
   imports: [
     BrowserModule,
@@ -104,6 +116,7 @@ const appRoutes: Routes = [
     CategoryListResolver,
     SectionListResolver,
     ItemListResolver,
+    AllItemsResolver,
   ],
   bootstrap: [AppComponent]
 })
