@@ -8,6 +8,6 @@ import { Observable } from 'rxjs/Observable';
 export class AllItemsResolver implements Resolve<any> {
   constructor(private http: HttpClient) { }
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
-  	return this.http.get('/api/items');
+  	return this.http.get('/api/items', {params: {'_id': '5a64292f19357214abffe516'}});
   }
 }

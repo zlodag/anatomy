@@ -2,7 +2,7 @@
 	display: block;
 	width: 100%;
 	width: -moz-available;
-    width: -webkit-fill-available;
+    width: -webkit-stretch;
 }
 #currentLineInput {
 	font-family: monospace;

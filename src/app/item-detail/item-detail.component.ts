@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AppStateService } from '../app-state.service';
-import { DetailField, DETAIL_FIELDS } from './detail-field';
+import { DetailField, DETAIL_FIELDS } from '../detail-field';
 
 @Component({
   templateUrl: './item-detail.component.html',
