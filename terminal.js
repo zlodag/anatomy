@@ -63,7 +63,7 @@ let testItems;
 let totalAnswers;
 let remainder;
 let newItem = true;
-let itemModel;
+// let itemModel;
 
 mongoose.connect('mongodb://localhost/mean-angular5', { useMongoClient: true })
 	  // .then(Region.find().exec())
@@ -118,38 +118,41 @@ function loop() {
 		if (!testItems || counter >= testItems.length){
 			console.log('No more items...');
 			process.exit();
+			return;
 		}
 		const item = testItems[counter];
-		itemModel = {};
-		itemModel.name = item.name;
+		console.log(`${counter + 1} of ${testItems.length}`);
+		// itemModel = {};
+		// itemModel.name = item.name;
 		totalAnswers = 0;
 		for (var i = DETAIL_FIELDS.length - 1; i >= 0; i--) {
 			const detailField = DETAIL_FIELDS[i];
 			const itemField = item[detailField.key];
 			if (detailField.array) {
-				itemModel[detailField.key] = [];
-				for (var j = 0; j < itemField.length; j++) {
-					itemModel[detailField.key].push(itemField[j]);
-				}
-				totalAnswers += itemModel[detailField.key].length;
+				// itemModel[detailField.key] = [];
+				// for (var j = 0; j < itemField.length; j++) {
+				// 	itemModel[detailField.key].push(itemField[j]);
+				// }
+				// totalAnswers += itemModel[detailField.key].length;
+				totalAnswers += itemField.length;
 			} else if (itemField) {
-				itemModel[detailField.key] = itemField;
+				// itemModel[detailField.key] = itemField;
 				totalAnswers++;
 			}
 		}
-		if (totalAnswers) {
-			console.log(`${counter + 1} of ${testItems.length}`);
-			remainder = totalAnswers;
+		remainder = totalAnswers;
+		if (remainder) {
 			newItem = false;
 		} else {
+			console.log(chalk`Skipping {bold.green ${item.name}} as no testable items...`);
 			counter++;
 		}
 	}
-	testMe(itemModel);
+	testMe(testItems[counter]);
 }
 
 function testMe(item){
-	rl.question(`${item.name}: [${totalAnswers-remainder}/${totalAnswers}]: `, answer => {
+	rl.question(`${item.name}: `, answer => {
 		processMe(answer, item);
 		loop();
 	});
@@ -171,6 +174,10 @@ function printHelp() {
 		console.log(chalk.underline(detailField.shortcut) + ' ' + chalk.blue(detailField.label));
 		// console.log(chalk.blue(detailField.shortcut + ': ') + detailField.label);
 	}
+}
+
+function printProgress(){
+	console.log(chalk.yellow(`${totalAnswers-remainder} of ${totalAnswers}`));
 }
 
 function printAll(item) {
@@ -195,11 +202,14 @@ function processMe(answer, item) {
 	if (answer == 'help') {
 		printHelp();
 		return;
+	} else if (answer == 'progress') {
+		printProgress();
+		return;
 	} else if (answer == 'cheat') {
 		console.log(chalk.inverse('CHEATING!'));
 		printAll(item);
 	} else if (answer == 'skip'){
-		console.log(chalk.bgYellow('SKIPPING...'));
+		console.log(chalk.yellow('SKIPPING...'));
 		counter++;
 		newItem = true;
 	} else {
@@ -228,7 +238,8 @@ function processMe(answer, item) {
 								}
 							}
 							if (!found) {
-								console.log(chalk.blue(detailField.label + ': ') + chalk.red.bold(token));
+	    						informIncorrect(token, detailField.label);
+			// console.log('✘ ' + chalk.blue(detailField.label + ': ') + chalk.red.bold(token));
 							}
 						}
 	    			} else {
@@ -237,7 +248,8 @@ function processMe(answer, item) {
 	    					delete item[detailField.key];
 							remainder--;
 	    				} else {
-							console.log(chalk.blue(detailField.label + ': ') + chalk.red.bold(token));
+	    					informIncorrect(token, detailField.label);
+							// console.log('✘ ' + chalk.blue(detailField.label + ': ') + chalk.red.bold(token));
 						}
 	    			}
 					// let guesses = detailField.array ? [match[3]]
@@ -263,11 +275,17 @@ function processMe(answer, item) {
 	}
 }
 
-function testToken(token, section, answer) {
+function testToken(token, label, answer) {
 	// console.log(chalk.cyan(`Testing token "${token}" against answer "${answer}"`));
-	if (answer.toLowerCase().indexOf(token.toLowerCase()) != -1) {
-		console.log(chalk.blue(section + ': ') + chalk.green.bold(answer));
+	const indexStart = answer.toLowerCase().indexOf(token.toLowerCase());
+	if (indexStart != -1) {
+		const indexEnd = indexStart + token.length;
+		console.log(chalk.green('✔', chalk.bold(label), answer.slice(0, indexStart) + chalk.inverse(answer.slice(indexStart, indexEnd)) + answer.slice(indexEnd, answer.length)));
 		return true;
 	}
 	return false;
+}
+
+function informIncorrect(token, label) {
+	console.log(chalk.red('✘', chalk.bold(label),  chalk.inverse(token)));
 }
