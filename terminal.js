@@ -3,6 +3,30 @@ const chalk = require('chalk');
 const mongoose = require('mongoose');
 const Promise = require('bluebird');
 mongoose.Promise = Promise;
+const shuffle = require('shuffle-array');
+const argv = require( 'argv' );
+argv.option([{
+    name: 'region',
+    short: 'r',
+    type: 'csv,string',
+    description: 'Filter by region',
+}, {
+    name: 'category',
+    short: 'c',
+    type: 'csv,string',
+    description: 'Filter by category',
+}, {
+    name: 'section',
+    short: 's',
+    type: 'csv,string',
+    description: 'Filter by section',
+}, {
+    name: 'item',
+    short: 'i',
+    type: 'csv,string',
+    description: 'Filter by item',
+}]);
+const args = argv.run();
 
 const Region = require('./models/Region.js');
 const Category = require('./models/Category.js');
@@ -46,46 +70,51 @@ const DETAIL_FIELDS = [
   	{key: 'variants', label: 'Variants', array: true, shortcut: 'va' },
 
 ];
-	// rl.on('SIGINT', () => {
-	//  //  console.log('Caught SIGINT.');
-	// 	// rl.close();
-	// 	process.exit();
-	// });
-	// rl.on('SIGTSTP', () => {
-	//   console.log('Caught SIGTSTP.');
-	// });
-	// rl.on('pause', () => {
-	//   console.log('Readline paused.');
-	// });
 
 let counter = 0;
 let testItems;
 let totalAnswers;
 let remainder;
 let newItem = true;
-// let itemModel;
 
 mongoose.connect('mongodb://localhost/mean-angular5', { useMongoClient: true })
-	  // .then(Region.find().exec())
-	  // .then(regions => {
-	  //     testItems = regions;
-	  //     console.log(testItems);
-	  //     loop();
-	  //   })
 	.then(() => {
-		let id = '5a64292f19357214abffe516';
-		// let query = Item.find({'_id' : id});
-		let query = Item.find();
-		return query.exec();
+		if (args.options.item){
+			return Item.find({$text: {$search:args.options.item.join(' ')}}).exec();
+		} else if (args.options.section){
+			return Section.find({$text: {$search:args.options.section.join(' ')}}, {_id: 1}).lean().exec()
+				.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
+		} else if (args.options.category){
+			return Category.find({$text: {$search:args.options.category.join(' ')}}, {_id: 1}).lean().exec()
+				.then(categories => Section.find({'category': {'$in': collateIds(categories)}}, {_id: 1}).lean().exec())
+				.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
+		} else if (args.options.region) {
+			return Region.find({$text: {$search:args.options.region.join(' ')}}, {_id: 1}).lean().exec()
+				.then(regions => Category.find({'region': {'$in': collateIds(regions)}}, {_id: 1}).lean().exec())
+				.then(categories => Section.find({'category': {'$in': collateIds(categories)}}, {_id: 1}).lean().exec())
+				.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
+		} else {
+			return Item.find().exec();
+		}
 	})
-	.then(regions => {
-		testItems = regions;
+	.then(items => {
+		shuffle(items);
+		testItems = items;
 		loop();
 	})
-	.catch(error => {
-		logError(error.message);
-		process.exit();
-	});
+	// .catch(error => {
+	// 	console.error(chalk.red(error.message));
+	// 	process.exit();
+	// })
+	;
+
+function collateIds(documents){
+	let ids = [];
+	for (var i = 0; i < documents.length; i++) {
+		ids.push(documents[i]._id);
+	}
+	return ids;
+}
 
 function tally(item){
 	let n = 0;
@@ -95,18 +124,6 @@ function tally(item){
 		n += (detailField.array ? itemField.length : itemField ? 1 : 0);
 	}
 	return n;
-}
-
-function logInfo(string){
-	console.log(chalk.green(string));
-}
-
-function logWarning(string){
-	console.log(chalk.magenta(string));
-}
-
-function logError(string){
-	console.error(chalk.red(string));
 }
 
 function loop() {
@@ -122,23 +139,11 @@ function loop() {
 		}
 		const item = testItems[counter];
 		console.log(`${counter + 1} of ${testItems.length}`);
-		// itemModel = {};
-		// itemModel.name = item.name;
 		totalAnswers = 0;
 		for (var i = DETAIL_FIELDS.length - 1; i >= 0; i--) {
 			const detailField = DETAIL_FIELDS[i];
 			const itemField = item[detailField.key];
-			if (detailField.array) {
-				// itemModel[detailField.key] = [];
-				// for (var j = 0; j < itemField.length; j++) {
-				// 	itemModel[detailField.key].push(itemField[j]);
-				// }
-				// totalAnswers += itemModel[detailField.key].length;
-				totalAnswers += itemField.length;
-			} else if (itemField) {
-				// itemModel[detailField.key] = itemField;
-				totalAnswers++;
-			}
+			totalAnswers += detailField.array ? itemField.length : !!itemField ? 1 : 0;
 		}
 		remainder = totalAnswers;
 		if (remainder) {
@@ -153,47 +158,72 @@ function loop() {
 
 function testMe(item){
 	rl.question(`${item.name}: `, answer => {
-		processMe(answer, item);
+		processMe(answer.trim(), item);
 		loop();
 	});
 }
 
-// function initFreshItem(item){
-// 	if (!testItems || counter >= testItems.length){
-// 		console.log('No more items...');
-// 		process.exit();
-// 	} else {
-// 		console.log(`Item number ${counter + 1} of ${testItems.length}`);
-// 		testMe(testItems[counter]);
-// 	}
-// }
-
-function printHelp() {
+function printKeys(){
 	for (let i = 0; i < DETAIL_FIELDS.length; i++) {
 		const detailField = DETAIL_FIELDS[i];
 		console.log(chalk.underline(detailField.shortcut) + ' ' + chalk.blue(detailField.label));
-		// console.log(chalk.blue(detailField.shortcut + ': ') + detailField.label);
 	}
+}
+
+function printHelp() {
+	console.log(chalk.bold.underline('\nUsage\n'));
+	console.log(chalk.bold('<key> <guess>[,<guess>...]'), '\n\t Attempt answer(s) to current item for the specified key');
+	console.log(chalk.bold('progress'), '\n\tShow current item progress');
+	console.log(chalk.bold('skip'), '\n\tSkip current item');
+	console.log(chalk.bold('cheat'), '\n\tPrint answer(s) to current item');
+	console.log(chalk.bold('cheat <key> [<key>...]'), '\n\tPrint answer(s) to current item for the specified key(s)');
+	console.log(chalk.bold('keys'), '\n\tDisplay a list of keys');
+	console.log(chalk.bold('help'), '\n\tShow this message');
+	console.log(chalk.bold('quit'), '\n\tQuit');
+
 }
 
 function printProgress(){
 	console.log(chalk.yellow(`${totalAnswers-remainder} of ${totalAnswers}`));
 }
 
-function printAll(item) {
-	console.log(chalk.blue.bold(item.name));
-	for (let i = 0; i < DETAIL_FIELDS.length; i++) {
-		const detailField = DETAIL_FIELDS[i];
-		const itemField = item[detailField.key];
-		if (detailField.array ? itemField.length : itemField) {
-			console.log(chalk.blue(detailField.label));
-			if (detailField.array) {
-				for (let j = 0; j < itemField.length; j++) {
-					console.log('+ ' + itemField[j]);
-				}
-			} else {
-				console.log('= ' + itemField);
+function printAnswer(item, detailField, forcePrintEvenIfEmpty) {
+	const itemField = item[detailField.key];
+	if (detailField.array ? itemField.length : itemField) {
+		console.log(chalk.blue(detailField.label));
+		if (detailField.array) {
+			for (let j = 0; j < itemField.length; j++) {
+				console.log('+ ' + itemField[j]);
 			}
+		} else {
+			console.log('= ' + itemField);
+		}
+	} else if (forcePrintEvenIfEmpty) {
+		console.log(chalk.gray(detailField.label, '(N/A)'));
+	}
+}
+
+function printAnswers(item, tokens) {
+	console.log(chalk.bold.underline(item.name));
+	if (tokens) {
+		for (var i = 0; i < tokens.length; i++) {
+			const token = tokens[i];
+			let found = false;
+			for (var j = 0; !found && j < DETAIL_FIELDS.length; j++) {
+				const detailField = DETAIL_FIELDS[j];
+				if (token == detailField.shortcut) {
+					found = true;
+					printAnswer(item, detailField, true);
+				}
+			}
+			if (!found) {
+				informInvalidKey(token);
+			}
+		}
+	} else {
+		for (let i = 0; i < DETAIL_FIELDS.length; i++) {
+			const detailField = DETAIL_FIELDS[i];
+			printAnswer(item, detailField, false);
 		}
 	}
 }
@@ -202,90 +232,95 @@ function processMe(answer, item) {
 	if (answer == 'help') {
 		printHelp();
 		return;
+	} else if (answer == 'quit') {
+		process.exit();
+		return;
+	} else if (answer == 'keys') {
+		printKeys();
+		return;
 	} else if (answer == 'progress') {
 		printProgress();
 		return;
-	} else if (answer == 'cheat') {
+	} else if (answer.startsWith('cheat')) {
 		console.log(chalk.inverse('CHEATING!'));
-		printAll(item);
+		const keys = answer.slice(5).match(/\S+/g);
+		printAnswers(item, keys);
 	} else if (answer == 'skip'){
 		console.log(chalk.yellow('SKIPPING...'));
 		counter++;
 		newItem = true;
 	} else {
-	    let match = answer.match(/^\W*(\w{2})\W+(.+)$/);
-	    // let match = answer.match(/^\W*(?:(cheat)\W+)?(\w{2})(?:\W+(.+))?$/);
-	    // if (match) {
-	    // 	console.log(match[2]);
-	    // }
+	    let match = answer.match(/^(\w{2})\s+(.+)$/);
 	    if (match) {
 	    	const key = match[1];
 	    	for (var i = 0; i < DETAIL_FIELDS.length; i++) {
 	    		const detailField = DETAIL_FIELDS[i];
 	    		if (key == detailField.shortcut){
-	    			// console.log(chalk.blue.bold(detailField.label));
 	    			const itemField = item[detailField.key];
 	    			if (detailField.array) {
 						const tokens = match[2].split(',');
 						for (var i = 0; i < tokens.length; i++) {
 							const token = tokens[i].trim();
-							let found = false;
-							for (var j = itemField.length - 1; !found && j >= 0; j--) {
-								if (testToken(token, detailField.label, itemField[j])){
-									found = true;
-									item[detailField.key].splice(j, 1);
-									remainder--;
+							if (adequateLength(token)){
+								let found = false;
+								for (var j = itemField.length - 1; !found && j >= 0; j--) {
+									if (testToken(token, detailField.label, itemField[j])){
+										found = true;
+										item[detailField.key].splice(j, 1);
+										remainder--;
+									}
 								}
-							}
-							if (!found) {
-	    						informIncorrect(token, detailField.label);
-			// console.log('✘ ' + chalk.blue(detailField.label + ': ') + chalk.red.bold(token));
+								if (!found) {
+		    						informIncorrect(token, detailField.label);
+								}
 							}
 						}
 	    			} else {
 	    				const token = match[2].trim();
-	    				if (itemField && testToken(token, detailField.label, itemField)){
-	    					delete item[detailField.key];
-							remainder--;
-	    				} else {
-	    					informIncorrect(token, detailField.label);
-							// console.log('✘ ' + chalk.blue(detailField.label + ': ') + chalk.red.bold(token));
-						}
+	    				if (adequateLength(token)) {
+		    				if (itemField && testToken(token, detailField.label, itemField)){
+		    					delete item[detailField.key];
+								remainder--;
+		    				} else {
+		    					informIncorrect(token, detailField.label);
+							}
+	    				}
 	    			}
-					// let guesses = detailField.array ? [match[3]]
-
-	    // 			if (detailField.array ? itemField.length : itemField){
-	    // 				let subFields = detailField.array ? itemField : [itemField];
-					// 	for (var j = 0; j < subFields.length; j++) {
-					// 		let subField = subFields[j];
-					// 		if (match[1] || )
-					// 		console.log(chalk.green('ANSWER: ') + chalk.blue(subField));
-					// 		counter++;
-					// 	}
-					// 	return;
-	    // 			}
-					// logWarning('No entry for: ' + detailField.label);
 	    			return;
 	    		}
 	    	}
-			logWarning('Invalid key: "' + key + '". Try "help"');
+	    	informInvalidKey(key);
 			return;
 	    }
-	    logWarning('Invalid input. Try "help"');
+	    console.log(chalk.magenta('Invalid input. Try "help"'));
 	}
 }
 
 function testToken(token, label, answer) {
-	// console.log(chalk.cyan(`Testing token "${token}" against answer "${answer}"`));
 	const indexStart = answer.toLowerCase().indexOf(token.toLowerCase());
 	if (indexStart != -1) {
-		const indexEnd = indexStart + token.length;
-		console.log(chalk.green('✔', chalk.bold(label), answer.slice(0, indexStart) + chalk.inverse(answer.slice(indexStart, indexEnd)) + answer.slice(indexEnd, answer.length)));
+		informCorrect(answer, indexStart, indexStart + token.length, label);
 		return true;
 	}
 	return false;
 }
 
+function informCorrect(answer, indexStart, indexEnd, label){
+	console.log(chalk.green('✔', chalk.bold(label), answer.slice(0, indexStart) + chalk.inverse(answer.slice(indexStart, indexEnd)) + answer.slice(indexEnd, answer.length)));
+}
+
 function informIncorrect(token, label) {
 	console.log(chalk.red('✘', chalk.bold(label),  chalk.inverse(token)));
+}
+
+function informInvalidKey(token) {
+	console.log(chalk.magenta(`Invalid key "${token}". Enter`, chalk.bold('keys'), 'to display a list of keys'));
+}
+
+function adequateLength(token){
+	if (token.length <= 2) {
+		console.log(chalk.magenta('✘', chalk.bold('Entry must be 3 or more characters'),  chalk.inverse(token)));
+		return false;
+	}
+	return true;
 }
