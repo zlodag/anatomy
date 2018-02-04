@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const readline = require('readline');
 const chalk = require('chalk');
 const mongoose = require('mongoose');
@@ -9,22 +11,22 @@ argv.option([{
     name: 'region',
     short: 'r',
     type: 'csv,string',
-    description: 'Filter by region',
+    description: 'Search by region',
 }, {
     name: 'category',
     short: 'c',
     type: 'csv,string',
-    description: 'Filter by category',
+    description: 'Search by category',
 }, {
     name: 'section',
     short: 's',
     type: 'csv,string',
-    description: 'Filter by section',
+    description: 'Search by section',
 }, {
     name: 'item',
     short: 'i',
     type: 'csv,string',
-    description: 'Filter by item',
+    description: 'Search by item',
 }]);
 const args = argv.run();
 
@@ -77,36 +79,51 @@ let totalAnswers;
 let remainder;
 let newItem = true;
 
-mongoose.connect('mongodb://localhost/mean-angular5', { useMongoClient: true })
-	.then(() => {
-		if (args.options.item){
-			return Item.find({$text: {$search:args.options.item.join(' ')}}).exec();
-		} else if (args.options.section){
-			return Section.find({$text: {$search:args.options.section.join(' ')}}, {_id: 1}).lean().exec()
-				.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
-		} else if (args.options.category){
-			return Category.find({$text: {$search:args.options.category.join(' ')}}, {_id: 1}).lean().exec()
-				.then(categories => Section.find({'category': {'$in': collateIds(categories)}}, {_id: 1}).lean().exec())
-				.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
-		} else if (args.options.region) {
-			return Region.find({$text: {$search:args.options.region.join(' ')}}, {_id: 1}).lean().exec()
-				.then(regions => Category.find({'region': {'$in': collateIds(regions)}}, {_id: 1}).lean().exec())
-				.then(categories => Section.find({'category': {'$in': collateIds(categories)}}, {_id: 1}).lean().exec())
-				.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
-		} else {
-			return Item.find().exec();
-		}
-	})
-	.then(items => {
-		shuffle(items);
-		testItems = items;
-		loop();
-	})
-	// .catch(error => {
-	// 	console.error(chalk.red(error.message));
-	// 	process.exit();
-	// })
-	;
+mongoose.connect('mongodb://localhost/anatomy', {
+	useMongoClient: true,
+	autoIndex: false,
+}).then(() => {
+	if (args.options.region) {
+		informSearching('regions', args.options.region);
+		return Region.find({$text: {$search:args.options.region.join(' ')}}, {_id: 1, name: 1}).lean().exec().tap(informFindings)
+			.then(regions => Category.find({'region': {'$in': collateIds(regions)}}, {_id: 1}).lean().exec())
+			.then(categories => Section.find({'category': {'$in': collateIds(categories)}}, {_id: 1}).lean().exec())
+			.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
+	} else if (args.options.category){
+		informSearching('categories', args.options.category);
+		return Category.find({$text: {$search:args.options.category.join(' ')}}, {_id: 1, name: 1}).lean().exec().tap(informFindings)
+			.then(categories => Section.find({'category': {'$in': collateIds(categories)}}, {_id: 1}).lean().exec())
+			.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
+	} else if (args.options.section){
+		informSearching('sections', args.options.section);
+		return Section.find({$text: {$search:args.options.section.join(' ')}}, {_id: 1, name: 1}).lean().exec().tap(informFindings)
+			.then(sections => Item.find({'section': {'$in': collateIds(sections)}}).exec());
+	} else if (args.options.item){
+		informSearching('items', args.options.item);
+		return Item.find({$text: {$search:args.options.item.join(' ')}}).exec().tap(informFindings);
+	} else {
+		console.log('Including', chalk.bold('all'), 'items');
+		return Item.find().exec();
+	}
+}).then(items => {
+	shuffle(items);
+	testItems = items;
+	loop();
+}).catch(error => {
+	console.error(chalk.red(error.message));
+	process.exit();
+});
+
+function informSearching(field, tokens){
+	console.log('Searching for', chalk.bold(field), 'matching:', chalk.blue(tokens.join(chalk.black(' | '))));
+}
+
+function informFindings(items){
+	console.log('Matched:', chalk.bold(items.length));
+	for (var i = 0; i < items.length; i++) {
+		console.log('-', chalk.blue(items[i].name))
+	}
+}
 
 function collateIds(documents){
 	let ids = [];
@@ -138,7 +155,7 @@ function loop() {
 			return;
 		}
 		const item = testItems[counter];
-		console.log(`${counter + 1} of ${testItems.length}`);
+		console.log(`\n${counter + 1} of ${testItems.length}`);
 		totalAnswers = 0;
 		for (var i = DETAIL_FIELDS.length - 1; i >= 0; i--) {
 			const detailField = DETAIL_FIELDS[i];
@@ -157,7 +174,7 @@ function loop() {
 }
 
 function testMe(item){
-	rl.question(`${item.name}: `, answer => {
+	rl.prompt(chalk.blue(`${item.name}: `), answer => {
 		processMe(answer.trim(), item);
 		loop();
 	});
@@ -171,16 +188,27 @@ function printKeys(){
 }
 
 function printHelp() {
-	console.log(chalk.bold.underline('\nUsage\n'));
-	console.log(chalk.bold('<key> <guess>[,<guess>...]'), '\n\t Attempt answer(s) to current item for the specified key');
-	console.log(chalk.bold('progress'), '\n\tShow current item progress');
-	console.log(chalk.bold('skip'), '\n\tSkip current item');
-	console.log(chalk.bold('cheat'), '\n\tPrint answer(s) to current item');
-	console.log(chalk.bold('cheat <key> [<key>...]'), '\n\tPrint answer(s) to current item for the specified key(s)');
-	console.log(chalk.bold('keys'), '\n\tDisplay a list of keys');
-	console.log(chalk.bold('help'), '\n\tShow this message');
-	console.log(chalk.bold('quit'), '\n\tQuit');
+	console.log(chalk`
+{bold.underline Usage}
 
+{bold <key> <guess>[,<guess>...]}
+	Attempt answer(s) to current item for the specified key
+{bold progress}
+	Show current item progress
+{bold skip}
+	Skip current item
+{bold cheat}
+	Print answer(s) to current item
+{bold cheat <key> [<key>...]}
+	Print answer(s) to current item for the specified key(s)
+{bold keys}
+	Display a list of keys
+{bold help}
+	Show this message
+{bold quit}
+	Quit
+`
+	);
 }
 
 function printProgress(){
@@ -204,7 +232,6 @@ function printAnswer(item, detailField, forcePrintEvenIfEmpty) {
 }
 
 function printAnswers(item, tokens) {
-	console.log(chalk.bold.underline(item.name));
 	if (tokens) {
 		for (var i = 0; i < tokens.length; i++) {
 			const token = tokens[i];

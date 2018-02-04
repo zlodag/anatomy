@@ -8,4 +8,6 @@ var RegionSchema = new mongoose.Schema({
   }
 });
 
+RegionSchema.index({name: 'text'});
+
 module.exports = mongoose.model('Region', RegionSchema);

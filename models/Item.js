@@ -47,4 +47,6 @@ var ItemSchema = new mongoose.Schema({
   variants: [String]
 });
 
+ItemSchema.index({name: 'text'});
+
 module.exports = mongoose.model('Item', ItemSchema);

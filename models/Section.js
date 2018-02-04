@@ -14,4 +14,6 @@ var SectionSchema = new mongoose.Schema({
   }
 });
 
+SectionSchema.index({name: 'text'});
+
 module.exports = mongoose.model('Section', SectionSchema);
